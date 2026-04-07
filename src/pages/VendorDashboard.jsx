@@ -9,7 +9,20 @@ import { motion } from 'framer-motion';
 const VendorDashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useContext(UserContext);
-  const { customers, deliveries, bills, settings } = useContext(DataContext);
+  const { customers, deliveries, bills, settings, loading } = useContext(DataContext);
+
+  if (loading) {
+    return (
+      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-main)', color: 'white' }}>
+        <motion.div 
+          animate={{ rotate: 360 }} 
+          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+          style={{ width: 40, height: 40, border: '4px solid rgba(255,255,255,0.1)', borderTop: '4px solid var(--primary)', borderRadius: '50%' }}
+        />
+        <p style={{ marginTop: '1rem', opacity: 0.6 }}>Synchronizing with Cloud...</p>
+      </div>
+    );
+  }
 
   const activeCustomers = customers.filter(c => c.status === 'active');
   const todayStr = format(new Date(), 'yyyy-MM-dd');

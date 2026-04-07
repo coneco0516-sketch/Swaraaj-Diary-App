@@ -1,12 +1,26 @@
 import React, { useContext } from 'react';
 import { UserContext } from '../context/UserContext';
 import { DataContext } from '../context/DataContext';
+import { motion } from 'framer-motion';
 import { LogOut, Calendar, Receipt, Droplet, User } from 'lucide-react';
 import { format } from 'date-fns';
 
 const CustomerDashboard = () => {
   const { user, logout } = useContext(UserContext);
-  const { customers, deliveries, bills } = useContext(DataContext);
+  const { customers, deliveries, bills, loading } = useContext(DataContext);
+
+  if (loading) {
+    return (
+      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-main)', color: 'white' }}>
+        <motion.div 
+          animate={{ rotate: 360 }} 
+          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+          style={{ width: 40, height: 40, border: '4px solid rgba(255,255,255,0.1)', borderTop: '4px solid var(--primary)', borderRadius: '50%' }}
+        />
+        <p style={{ marginTop: '1rem', opacity: 0.6 }}>Loading your Dashboard...</p>
+      </div>
+    );
+  }
 
   const customer = customers.find(c => c.phone === user.phone) || {
      name: 'Guest User',

@@ -2,11 +2,25 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Minus, Plus, Search, CheckCircle, Clock } from 'lucide-react';
 import { format } from 'date-fns';
+import { motion } from 'framer-motion';
 import { DataContext } from '../../context/DataContext';
 
 const DailyDelivery = () => {
   const navigate = useNavigate();
-  const { customers, deliveries, setDeliveries } = useContext(DataContext);
+  const { customers, deliveries, setDeliveries, saveDeliveries, loading } = useContext(DataContext);
+
+  if (loading) {
+    return (
+      <div style={{ height: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+        <motion.div 
+          animate={{ rotate: 360 }} 
+          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+          style={{ width: 40, height: 40, border: '4px solid rgba(255,255,255,0.1)', borderTop: '4px solid var(--primary)', borderRadius: '50%' }}
+        />
+        <p style={{ marginTop: '1rem', opacity: 0.6 }}>Loading Delivery Logs...</p>
+      </div>
+    );
+  }
   const [searchTerm, setSearchTerm] = useState('');
   
   const todayStr = format(new Date(), 'yyyy-MM-dd');

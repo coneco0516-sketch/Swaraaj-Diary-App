@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { App as CapApp } from '@capacitor/app';
 import Login from './pages/Login';
 import VendorDashboard from './pages/VendorDashboard';
 import CustomerDashboard from './pages/CustomerDashboard';
@@ -20,6 +21,26 @@ import { UserContext } from './context/UserContext';
 import { DataProvider } from './context/DataContext';
 import MainLayout from './components/MainLayout';
 import './index.css';
+
+const NativeNavigation = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        const handler = CapApp.addListener('backButton', ({ canGoBack }) => {
+            if (location.pathname === '/vendor' || location.pathname === '/customer' || location.pathname === '/home' || location.pathname === '/') {
+                if (window.confirm("Do you want to exit the app?")) {
+                  CapApp.exitApp();
+                }
+            } else {
+                navigate(-1);
+            }
+        });
+        return () => { handler.then(h => h.remove()); };
+    }, [location, navigate]);
+
+    return null;
+};
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -47,6 +68,7 @@ function App() {
     <UserContext.Provider value={{ user, login, logout }}>
       <DataProvider>
         <Router>
+          <NativeNavigation />
           <MainLayout>
             <Routes>
               <Route path="/login" element={!user ? <Login /> : <Navigate to={user.role === 'vendor' ? '/vendor' : '/customer'} />} />

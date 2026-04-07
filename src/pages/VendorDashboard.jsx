@@ -83,6 +83,7 @@ const VendorDashboard = () => {
       <div className="stack" style={{ gap: '0.75rem' }}>
         {[
           { to: "/vendor/delivery", icon: <Truck />, label: "Daily Logs", color: "#f97316", desc: "Mark today's milk drops" },
+          { to: "/vendor/reports", icon: <Activity />, label: "Staff Tracking", color: "#8b5cf6", desc: "Filter logs by name", hide: user.subRole !== 'owner' },
           { to: "/vendor/customers", icon: <Users />, label: "Client Base", color: "#0ea5e9", desc: "Manage subscription details", hide: user.subRole === 'delivery' },
           { to: "/vendor/billing", icon: <Receipt />, label: "Billing", color: "#10b981", desc: "Invoices and collection", hide: user.subRole === 'delivery' },
           { to: "/vendor/staff", icon: <ShieldCheck />, label: "Store Access", color: "#6366f1", desc: "Staff portal management", hide: user.subRole !== 'owner' }

@@ -15,6 +15,7 @@ import Privacy from './pages/Privacy';
 import StaffManagement from './pages/Vendor/StaffManagement';
 import Settings from './pages/Vendor/Settings';
 import CustomerDetail from './pages/Vendor/CustomerDetail';
+import StaffReports from './pages/Vendor/StaffReports';
 import History from './pages/Customer/History';
 import Profile from './pages/Customer/Profile';
 import { UserContext } from './context/UserContext';
@@ -80,6 +81,7 @@ function App() {
               <Route path="/vendor/billing" element={user?.role === 'vendor' ? <Billing /> : <Navigate to="/login" />} />
               <Route path="/vendor/settings" element={user?.role === 'vendor' ? <Settings /> : <Navigate to="/login" />} />
               <Route path="/vendor/customers/:id" element={user?.role === 'vendor' ? <CustomerDetail /> : <Navigate to="/login" />} />
+              <Route path="/vendor/reports" element={user?.role === 'vendor' ? <StaffReports /> : <Navigate to="/login" />} />
               <Route path="/vendor/staff" element={user?.role === 'vendor' && user?.subRole === 'owner' ? <StaffManagement /> : <Navigate to="/vendor" />} />
 
               {/* Customer Routes */}

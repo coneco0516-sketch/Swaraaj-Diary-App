@@ -1,21 +1,21 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, UserPlus, Search, Phone, Droplet, User, Edit } from 'lucide-react';
+import { ArrowLeft, UserPlus, Search, Phone, Droplet, User, Edit, ChevronRight } from 'lucide-react';
 import { DataContext } from '../../context/DataContext';
 
 const CustomerManagement = () => {
   const navigate = useNavigate();
-  const { customers, addCustomer } = useContext(DataContext);
+  const { customers, addCustomer, staff } = useContext(DataContext);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddMode, setIsAddMode] = useState(false);
 
-  const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', defaultQuantity: '1.5' });
+  const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', defaultQuantity: '1.5', assignedStaffId: '' });
 
   const handleAdd = async (e) => {
     e.preventDefault();
     await addCustomer({ ...newCustomer, status: 'active' });
     setIsAddMode(false);
-    setNewCustomer({ name: '', phone: '', defaultQuantity: '1.5' });
+    setNewCustomer({ name: '', phone: '', defaultQuantity: '1.5', assignedStaffId: '' });
   };
 
   const filtered = customers.filter(c => 
@@ -72,6 +72,18 @@ const CustomerManagement = () => {
                 <option value="1.0">1.0 L</option>
                 <option value="1.5">1.5 L</option>
                 <option value="2.0">2.0 L</option>
+              </select>
+            </div>
+            <div style={{ display: 'grid', gap: '0.5rem' }}>
+              <label style={{ fontSize: '0.875rem', fontWeight: '500', color: 'var(--text-muted)' }}>Assign to Delivery Incharge (Optional)</label>
+              <select 
+                value={newCustomer.assignedStaffId}
+                onChange={e => setNewCustomer({...newCustomer, assignedStaffId: e.target.value})}
+              >
+                <option value="">-- No Staff Assigned --</option>
+                {staff.map(s => (
+                  <option key={s.id} value={s.id}>{s.name} ({s.phone})</option>
+                ))}
               </select>
             </div>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>

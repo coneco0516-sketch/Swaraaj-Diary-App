@@ -54,17 +54,21 @@ def startup():
             phone VARCHAR(20) UNIQUE NOT NULL,
             defaultQuantity FLOAT DEFAULT 1.5,
             status VARCHAR(20) DEFAULT 'active',
-            rate FLOAT DEFAULT 50.0
+            rate FLOAT DEFAULT 50.0,
+            assignedStaffId INT,
+            FOREIGN KEY(assignedStaffId) REFERENCES staff(id)
         )
     """)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS deliveries (
             id INT AUTO_INCREMENT PRIMARY KEY,
             customerId INT NOT NULL,
+            staffId INT,
             date VARCHAR(20) NOT NULL,
             quantity FLOAT NOT NULL,
             status VARCHAR(20) DEFAULT 'pending',
-            FOREIGN KEY(customerId) REFERENCES customers(id)
+            FOREIGN KEY(customerId) REFERENCES customers(id),
+            FOREIGN KEY(staffId) REFERENCES staff(id)
         )
     """)
     cursor.execute("""
@@ -159,8 +163,8 @@ def add_customer(data: Dict[str, Any]):
     db = get_db()
     cursor = db.cursor()
     try:
-        cursor.execute("INSERT INTO customers (name, phone, defaultQuantity, rate, status) VALUES (%s, %s, %s, %s, %s)", 
-                       (data['name'], data['phone'], data.get('defaultQuantity', 1.5), data.get('rate', 50.0), 'active'))
+        cursor.execute("INSERT INTO customers (name, phone, defaultQuantity, rate, status, assignedStaffId) VALUES (%s, %s, %s, %s, %s, %s)", 
+                       (data['name'], data['phone'], data.get('defaultQuantity', 1.5), data.get('rate', 50.0), 'active', data.get('assignedStaffId')))
         db.commit()
         return {"id": cursor.lastrowid}
     except Exception as e:
@@ -191,10 +195,10 @@ def save_deliveries(logs: List[Dict[str, Any]]):
     for l in logs:
         # MySQL UPSERT
         cursor.execute("""
-            INSERT INTO deliveries (customerId, date, quantity, status) 
-            VALUES (%s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE quantity = VALUES(quantity), status = VALUES(status)
-        """, (l['customerId'], l['date'], l['quantity'], l['status']))
+            INSERT INTO deliveries (customerId, date, quantity, status, staffId) 
+            VALUES (%s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE quantity = VALUES(quantity), status = VALUES(status), staffId = VALUES(staffId)
+        """, (l['customerId'], l['date'], l['quantity'], l['status'], l.get('staffId')))
     db.commit()
     cursor.close()
     db.close()

@@ -9,6 +9,7 @@ export const DataProvider = ({ children }) => {
   const [customers, setCustomers] = useState([]);
   const [deliveries, setDeliveries] = useState({});
   const [bills, setBills] = useState([]);
+  const [staff, setStaff] = useState([]);
   const [settings, setSettings] = useState({ shopName: 'Swaraaj Dairy', milkRate: '50.0' });
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +23,8 @@ export const DataProvider = ({ children }) => {
       fetchCustomers(),
       fetchDeliveries(),
       fetchBills(),
-      fetchSettings()
+      fetchSettings(),
+      fetchStaff()
     ]);
     setLoading(false);
   };
@@ -153,12 +155,43 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+  const fetchStaff = async () => {
+    try {
+      const res = await fetch(`${API_URL}/staff`);
+      if (res.ok) {
+        const data = await res.json();
+        setStaff(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const addStaff = async (staffData) => {
+    try {
+      const res = await fetch(`${API_URL}/staff`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(staffData)
+      });
+      if (res.ok) {
+        fetchStaff();
+        return true;
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error adding staff');
+    }
+    return false;
+  };
+
   return (
     <DataContext.Provider value={{
       customers, setCustomers, fetchCustomers, addCustomer,
       deliveries, setDeliveries, saveDeliveries, fetchDeliveries,
       bills, setBills, fetchBills, updateBillStatus, generateBills,
       settings, setSettings, saveSettings, fetchSettings,
+      staff, setStaff, fetchStaff, addStaff,
       loading, setLoading, refreshAll,
       API_URL
     }}>

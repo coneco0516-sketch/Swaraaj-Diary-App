@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Minus, Plus, Search, CheckCircle, Clock, UserPlus, X } from 'lucide-react';
+import { ArrowLeft, Calendar, Minus, Plus, Search, CheckCircle, Clock, UserPlus, X, BadgeIndianRupee, PackagePlus } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DataContext } from '../../context/DataContext';
@@ -12,9 +12,8 @@ const DailyDelivery = () => {
     const { customers, deliveries, setDeliveries, saveDeliveries, loading, staff, addCustomer } = useContext(DataContext);
     const [searchTerm, setSearchTerm] = useState('');
     const [isQuickAdd, setIsQuickAdd] = useState(false);
-    const [quickCustomer, setQuickCustomer] = useState({ name: '', phone: '', defaultQuantity: '1.5' });
+    const [quickCustomer, setQuickCustomer] = useState({ name: '', phone: '', defaultQuantity: '1.5', rate: '50' });
 
-    // Find actual staff ID from staff list based on phone
     const currentStaff = staff.find(s => s.phone === user.phone);
     const staffId = currentStaff?.id;
     const todayStr = format(new Date(), 'yyyy-MM-dd');
@@ -22,8 +21,6 @@ const DailyDelivery = () => {
     useEffect(() => {
         if (!deliveries[todayStr] && customers.length > 0) {
             let filteredCustomers = customers.filter(c => c.status === 'active');
-            
-            // If staff member is logged in, only show their assigned households
             if (user.subRole === 'staff' && staffId) {
                 filteredCustomers = filteredCustomers.filter(c => c.assignedStaffId === staffId);
             }
@@ -31,30 +28,21 @@ const DailyDelivery = () => {
             const initialDeliveries = filteredCustomers.map(c => ({
                 customerId: c.id,
                 quantity: parseFloat(c.defaultQuantity),
+                rate: parseFloat(c.rate || 50),
+                extraQuantity: 0,
+                extraRate: parseFloat(c.rate || 50),
                 status: 'pending'
             }));
-            setDeliveries(prev => ({
-                ...prev,
-                [todayStr]: initialDeliveries
-            }));
+            setDeliveries(prev => ({ ...prev, [todayStr]: initialDeliveries }));
         }
     }, [customers, deliveries, setDeliveries, todayStr, user, staffId]);
 
     const todayData = deliveries[todayStr] || [];
 
-    const handleUpdate = (customerId, change) => {
+    const handleUpdate = (customerId, field, value) => {
         setDeliveries(prev => {
             const updated = prev[todayStr].map(item => 
-                item.customerId === customerId ? { ...item, quantity: Math.max(0, item.quantity + change) } : item
-            );
-            return { ...prev, [todayStr]: updated };
-        });
-    };
-
-    const handleStatus = (customerId) => {
-        setDeliveries(prev => {
-            const updated = prev[todayStr].map(item => 
-                item.customerId === customerId ? { ...item, status: item.status === 'pending' ? 'delivered' : 'pending' } : item
+                item.customerId === customerId ? { ...item, [field]: value } : item
             );
             return { ...prev, [todayStr]: updated };
         });
@@ -64,22 +52,23 @@ const DailyDelivery = () => {
         e.preventDefault();
         const saved = await addCustomer({ ...quickCustomer, assignedStaffId: staffId, status: 'active' });
         if (saved) {
-            // Add new customer to today's local log immediately
             setDeliveries(prev => {
                 const updated = [...(prev[todayStr] || []), {
                     customerId: saved.id,
                     quantity: parseFloat(quickCustomer.defaultQuantity),
+                    rate: parseFloat(quickCustomer.rate),
+                    extraQuantity: 0,
+                    extraRate: parseFloat(quickCustomer.rate),
                     status: 'delivered'
                 }];
                 return { ...prev, [todayStr]: updated };
             });
             setIsQuickAdd(false);
-            setQuickCustomer({ name: '', phone: '', defaultQuantity: '1.5' });
+            setQuickCustomer({ name: '', phone: '', defaultQuantity: '1.5', rate: '50' });
         }
     };
 
     const handleSync = async () => {
-        // Include staff info in payload
         const payload = todayData.map(d => ({ ...d, staffId }));
         await saveDeliveries(payload);
         alert("Logs synced with Server");
@@ -98,21 +87,11 @@ const DailyDelivery = () => {
         c.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const pendingCount = todayData.filter(i => i.status === 'pending').length;
-
-    if (loading) {
-        return (
-            <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-main)', color: 'white' }}>
-                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                    style={{ width: 40, height: 40, border: '4px solid rgba(255,255,255,0.1)', borderTop: '4px solid var(--primary)', borderRadius: '50%' }} />
-                <p style={{ marginTop: '1rem', opacity: 0.6 }}>Loading Delivery Logs...</p>
-            </div>
-        );
-    }
+    if (loading) return <div className="container">Loading...</div>;
 
     return (
         <div style={{ padding: '1rem', flex: 1, minHeight: '100vh', background: 'var(--bg-main)', color: 'white' }}>
-            <header style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+            <header style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
                 <button className="btn" onClick={() => navigate('/vendor')} style={{ background: 'none', color: 'white' }}>
                     <ArrowLeft size={24} />
                 </button>
@@ -121,19 +100,6 @@ const DailyDelivery = () => {
                     <p style={{ fontSize: '0.875rem', opacity: 0.6 }}>{format(new Date(), 'EEEE, dd MMM')}</p>
                 </div>
             </header>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div className="card-glass" style={{ textAlign: 'center' }}>
-                    <Clock size={20} color="var(--primary)" style={{ marginBottom: '0.5rem' }} />
-                    <p style={{ fontSize: '0.75rem', opacity: 0.6 }}>PENDING</p>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: '700' }}>{pendingCount}</h3>
-                </div>
-                <div className="card-glass" style={{ textAlign: 'center' }}>
-                    <CheckCircle size={20} color="var(--accent)" style={{ marginBottom: '0.5rem' }} />
-                    <p style={{ fontSize: '0.75rem', opacity: 0.6 }}>DELIVERED</p>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: '700' }}>{todayData.length - pendingCount}</h3>
-                </div>
-            </div>
 
             <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
                 <div style={{ position: 'relative', flex: 1 }}>
@@ -145,22 +111,67 @@ const DailyDelivery = () => {
                 </button>
             </div>
 
-            <div style={{ display: 'grid', gap: '1rem', paddingBottom: '120px' }}>
+            <div style={{ display: 'grid', gap: '1.5rem', paddingBottom: '140px' }}>
                 {filtered.map(item => (
-                    <div key={item.customerId} className="card-glass" style={{ opacity: item.status === 'delivered' ? 0.6 : 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                            <h4 style={{ fontWeight: '600' }}>{item.name}</h4>
-                            <p style={{ fontSize: '0.875rem', opacity: 0.6 }}>{item.phone}</p>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <button className="btn" onClick={() => handleUpdate(item.customerId, -0.5)} style={{ background: 'rgba(255,255,255,0.1)', padding: '0.25rem' }}><Minus size={14} /></button>
-                                <span style={{ fontWeight: '700', minWidth: '45px', textAlign: 'center' }}>{item.quantity}L</span>
-                                <button className="btn" onClick={() => handleUpdate(item.customerId, 0.5)} style={{ background: 'rgba(255,255,255,0.1)', padding: '0.25rem' }}><Plus size={14} /></button>
+                    <div key={item.customerId} className="card-glass" style={{ borderLeft: item.status === 'delivered' ? '4px solid var(--accent)' : '4px solid #475569' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                            <div>
+                                <h4 style={{ fontWeight: '700' }}>{item.name}</h4>
+                                <span style={{ fontSize: '0.75rem', opacity: 0.5 }}>{item.phone}</span>
                             </div>
-                            <button className={`btn ${item.status === 'delivered' ? 'btn-primary' : 'btn-secondary'}`} style={{ padding: '0.5rem' }} onClick={() => handleStatus(item.customerId)}>
-                                <CheckCircle size={20} />
+                            <button 
+                                className={`btn ${item.status === 'delivered' ? 'btn-primary' : 'btn-secondary'}`}
+                                onClick={() => handleUpdate(item.customerId, 'status', item.status === 'pending' ? 'delivered' : 'pending')}
+                                style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }}
+                            >
+                                {item.status === 'delivered' ? 'DELIVERED' : 'PENDING'}
                             </button>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                            <div style={{ display: 'grid', gap: '0.4rem' }}>
+                                <label style={{ fontSize: '0.65rem', fontWeight: '600', opacity: 0.6 }}>BASE QUANTITY (L)</label>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <button className="btn-mini" onClick={() => handleUpdate(item.customerId, 'quantity', Math.max(0, item.quantity - 0.5))}><Minus size={12} /></button>
+                                    <span style={{ fontWeight: '800' }}>{item.quantity}</span>
+                                    <button className="btn-mini" onClick={() => handleUpdate(item.customerId, 'quantity', item.quantity + 0.5)}><Plus size={12} /></button>
+                                </div>
+                            </div>
+                            <div style={{ display: 'grid', gap: '0.4rem' }}>
+                                <label style={{ fontSize: '0.65rem', fontWeight: '600', opacity: 0.6 }}>BASE RATE (₹/L)</label>
+                                <input 
+                                    type="number" 
+                                    value={item.rate} 
+                                    onChange={(e) => handleUpdate(item.customerId, 'rate', parseFloat(e.target.value))}
+                                    style={{ padding: '0.4rem', fontSize: '0.8rem', background: 'rgba(255,255,255,0.05)' }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Extra Milk Section */}
+                        <div style={{ borderTop: '1px dashed rgba(255,255,255,0.1)', paddingTop: '1rem', marginTop: '1rem' }}>
+                            <p style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--accent)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                <PackagePlus size={14} /> EXTRA MILK (OPTIONAL)
+                            </p>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div style={{ display: 'grid', gap: '0.4rem' }}>
+                                    <label style={{ fontSize: '0.65rem', fontWeight: '600', opacity: 0.6 }}>EXTRA QTY (L)</label>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <button className="btn-mini" onClick={() => handleUpdate(item.customerId, 'extraQuantity', Math.max(0, item.extraQuantity - 0.5))}><Minus size={12} /></button>
+                                        <span style={{ fontWeight: '800' }}>{item.extraQuantity}</span>
+                                        <button className="btn-mini" onClick={() => handleUpdate(item.customerId, 'extraQuantity', item.extraQuantity + 0.5)}><Plus size={12} /></button>
+                                    </div>
+                                </div>
+                                <div style={{ display: 'grid', gap: '0.4rem' }}>
+                                    <label style={{ fontSize: '0.65rem', fontWeight: '600', opacity: 0.6 }}>EXTRA RATE (₹/L)</label>
+                                    <input 
+                                        type="number" 
+                                        value={item.extraRate} 
+                                        onChange={(e) => handleUpdate(item.customerId, 'extraRate', parseFloat(e.target.value))}
+                                        style={{ padding: '0.4rem', fontSize: '0.8rem', background: 'rgba(255,255,255,0.05)' }}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 ))}
@@ -174,16 +185,14 @@ const DailyDelivery = () => {
                                 <h3 style={{ fontSize: '1.25rem', fontWeight: '700' }}>Quick Add Household</h3>
                                 <button onClick={() => setIsQuickAdd(false)} style={{ background: 'none', color: 'white' }}><X /></button>
                             </div>
-                            <form onSubmit={handleQuickAdd} style={{ display: 'grid', gap: '1.25rem' }}>
-                                <input type="text" placeholder="House Name / Owner" required value={quickCustomer.name} onChange={e => setQuickCustomer({...quickCustomer, name: e.target.value})} />
-                                <input type="tel" placeholder="Phone Number" required value={quickCustomer.phone} onChange={e => setQuickCustomer({...quickCustomer, phone: e.target.value})} />
-                                <select value={quickCustomer.defaultQuantity} onChange={e => setQuickCustomer({...quickCustomer, defaultQuantity: e.target.value})}>
-                                    <option value="0.5">0.5 Liters</option>
-                                    <option value="1.0">1.0 Liters</option>
-                                    <option value="1.5">1.5 Liters</option>
-                                    <option value="2.0">2.0 Liters</option>
-                                </select>
-                                <button type="submit" className="btn btn-primary" style={{ padding: '1rem', width: '100%' }}>Add & Mark Delivered Today</button>
+                            <form onSubmit={handleQuickAdd} style={{ display: 'grid', gap: '1rem' }}>
+                                <input type="text" placeholder="House Name" required value={quickCustomer.name} onChange={e => setQuickCustomer({...quickCustomer, name: e.target.value})} />
+                                <input type="tel" placeholder="Phone" required value={quickCustomer.phone} onChange={e => setQuickCustomer({...quickCustomer, phone: e.target.value})} />
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <input type="number" placeholder="Qty (L)" required value={quickCustomer.defaultQuantity} onChange={e => setQuickCustomer({...quickCustomer, defaultQuantity: e.target.value})} />
+                                    <input type="number" placeholder="Rate (₹)" required value={quickCustomer.rate} onChange={e => setQuickCustomer({...quickCustomer, rate: e.target.value})} />
+                                </div>
+                                <button type="submit" className="btn btn-primary" style={{ padding: '1rem', marginTop: '1rem' }}>Add & Mark Delivered</button>
                             </form>
                         </motion.div>
                     </motion.div>
@@ -192,7 +201,7 @@ const DailyDelivery = () => {
 
             <div style={{ position: 'fixed', bottom: '90px', left: '1rem', right: '1rem', zIndex: 10 }}>
                 <button className="btn btn-primary" style={{ width: '100%', padding: '1rem', borderRadius: '16px', boxShadow: '0 8px 32px var(--primary)' }} onClick={handleSync}>
-                    <CheckCircle size={20} /> Save My Route Logs
+                    <CheckCircle size={20} /> Save Combined Delivery Logs
                 </button>
             </div>
         </div>

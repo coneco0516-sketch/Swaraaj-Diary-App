@@ -66,6 +66,9 @@ def startup():
             staffId INT,
             date VARCHAR(20) NOT NULL,
             quantity FLOAT NOT NULL,
+            rate FLOAT DEFAULT 50.0,
+            extraQuantity FLOAT DEFAULT 0.0,
+            extraRate FLOAT DEFAULT 50.0,
             status VARCHAR(20) DEFAULT 'pending',
             FOREIGN KEY(customerId) REFERENCES customers(id),
             FOREIGN KEY(staffId) REFERENCES staff(id)
@@ -195,10 +198,16 @@ def save_deliveries(logs: List[Dict[str, Any]]):
     for l in logs:
         # MySQL UPSERT
         cursor.execute("""
-            INSERT INTO deliveries (customerId, date, quantity, status, staffId) 
-            VALUES (%s, %s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE quantity = VALUES(quantity), status = VALUES(status), staffId = VALUES(staffId)
-        """, (l['customerId'], l['date'], l['quantity'], l['status'], l.get('staffId')))
+            INSERT INTO deliveries (customerId, date, quantity, rate, extraQuantity, extraRate, status, staffId) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE 
+                quantity = VALUES(quantity), 
+                rate = VALUES(rate), 
+                extraQuantity = VALUES(extraQuantity), 
+                extraRate = VALUES(extraRate), 
+                status = VALUES(status), 
+                staffId = VALUES(staffId)
+        """, (l['customerId'], l['date'], l['quantity'], l.get('rate', 50.0), l.get('extraQuantity', 0.0), l.get('extraRate', 50.0), l['status'], l.get('staffId')))
     db.commit()
     cursor.close()
     db.close()
@@ -234,10 +243,10 @@ def generate_bills(data: Dict[str, Any]):
     customers = cursor.fetchall()
     
     for c in customers:
-        cursor.execute("SELECT quantity FROM deliveries WHERE customerId = %s AND date LIKE %s AND status = 'delivered'", (c['id'], f"{month}%"))
+        cursor.execute("SELECT quantity, rate, extraQuantity, extraRate FROM deliveries WHERE customerId = %s AND date LIKE %s AND status = 'delivered'", (c['id'], f"{month}%"))
         logs = cursor.fetchall()
-        total_q = sum([l['quantity'] for l in logs])
-        amount = total_q * c['rate']
+        total_q = sum([l['quantity'] + l['extraQuantity'] for l in logs])
+        amount = sum([(l['quantity'] * l['rate']) + (l['extraQuantity'] * l['extraRate']) for l in logs])
         
         if total_q > 0:
             cursor.execute("""

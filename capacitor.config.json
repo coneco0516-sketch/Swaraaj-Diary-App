@@ -1,0 +1,6 @@
+{
+  "appId": "com.swaraaj.dairy",
+  "appName": "Swaraaj Milk Dairy",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

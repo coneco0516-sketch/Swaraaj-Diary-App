@@ -85,15 +85,7 @@ def startup():
             FOREIGN KEY(customerId) REFERENCES customers(id)
         )
     """)
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS settings (
-            `key` VARCHAR(50) PRIMARY KEY,
-            value TEXT NOT NULL
-        )
-    """)
     # Defaults
-    cursor.execute("INSERT IGNORE INTO settings (`key`, value) VALUES ('shopName', 'Swaraaj Milk Dairy')")
-    cursor.execute("INSERT IGNORE INTO settings (`key`, value) VALUES ('milkRate', '50.0')")
     cursor.execute("INSERT IGNORE INTO staff (name, phone, subRole) VALUES ('Swaraaj Owner', '9149405624', 'owner')")
     
     db.commit()
@@ -105,27 +97,6 @@ def startup():
 @app.get("/")
 def read_root():
     return {"message": "Cloud Backend Active (Python/MySQL)"}
-
-@app.get("/api/settings")
-def get_settings():
-    db = get_db()
-    cursor = db.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM settings")
-    settings = {row['key']: row['value'] for row in cursor.fetchall()}
-    cursor.close()
-    db.close()
-    return settings
-
-@app.post("/api/settings")
-def save_settings(updates: Dict[str, Any]):
-    db = get_db()
-    cursor = db.cursor()
-    for k, v in updates.items():
-        cursor.execute("INSERT INTO settings (`key`, value) VALUES (%s, %s) ON DUPLICATE KEY UPDATE value = %s", (k, str(v), str(v)))
-    db.commit()
-    cursor.close()
-    db.close()
-    return {"success": True}
 
 @app.get("/api/staff")
 def get_staff():

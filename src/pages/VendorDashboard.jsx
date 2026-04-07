@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 const VendorDashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useContext(UserContext);
-  const { customers, deliveries, bills, settings, loading } = useContext(DataContext);
+  const { customers, deliveries, bills, loading } = useContext(DataContext);
 
   if (loading) {
     return (
@@ -42,13 +42,10 @@ const VendorDashboard = () => {
       >
         <div>
           <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.8 }}>Dairy Console</span>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'white' }}>{settings.shopName} Hub</h1>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'white' }}>Swaraaj Dairy Hub</h1>
           <p style={{ fontSize: '0.85rem', opacity: 0.9 }}>Welcome, {user.name || 'Vendor'}</p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button onClick={() => navigate('/vendor/settings')} style={{ background: 'rgba(255,255,255,0.2)', padding: '0.5rem', borderRadius: '10px', color: 'white', border: 'none' }}>
-            <SettingsIcon size={20} />
-          </button>
           <button className="btn" onClick={logout} style={{ background: 'rgba(255,255,255,0.2)', padding: '0.5rem', borderRadius: '10px', color: 'white' }}>
             <LogOut size={20} />
           </button>

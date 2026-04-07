@@ -13,7 +13,6 @@ import Contact from './pages/Contact';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import StaffManagement from './pages/Vendor/StaffManagement';
-import Settings from './pages/Vendor/Settings';
 import CustomerDetail from './pages/Vendor/CustomerDetail';
 import StaffReports from './pages/Vendor/StaffReports';
 import History from './pages/Customer/History';
@@ -79,7 +78,6 @@ function App() {
               <Route path="/vendor/customers" element={user?.role === 'vendor' ? <CustomerManagement /> : <Navigate to="/login" />} />
               <Route path="/vendor/delivery" element={user?.role === 'vendor' ? <DailyDelivery /> : <Navigate to="/login" />} />
               <Route path="/vendor/billing" element={user?.role === 'vendor' ? <Billing /> : <Navigate to="/login" />} />
-              <Route path="/vendor/settings" element={user?.role === 'vendor' ? <Settings /> : <Navigate to="/login" />} />
               <Route path="/vendor/customers/:id" element={user?.role === 'vendor' ? <CustomerDetail /> : <Navigate to="/login" />} />
               <Route path="/vendor/reports" element={user?.role === 'vendor' ? <StaffReports /> : <Navigate to="/login" />} />
               <Route path="/vendor/staff" element={user?.role === 'vendor' && user?.subRole === 'owner' ? <StaffManagement /> : <Navigate to="/vendor" />} />

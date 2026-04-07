@@ -10,7 +10,6 @@ export const DataProvider = ({ children }) => {
   const [deliveries, setDeliveries] = useState({});
   const [bills, setBills] = useState([]);
   const [staff, setStaff] = useState([]);
-  const [settings, setSettings] = useState({ shopName: 'Swaraaj Dairy', milkRate: '50.0' });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,38 +22,11 @@ export const DataProvider = ({ children }) => {
       fetchCustomers(),
       fetchDeliveries(),
       fetchBills(),
-      fetchSettings(),
       fetchStaff()
     ]);
     setLoading(false);
   };
 
-  const fetchSettings = async () => {
-    try {
-      const res = await fetch(`${API_URL}/settings`);
-      if (res.ok) {
-        const data = await res.json();
-        setSettings(data);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const saveSettings = async (updates) => {
-    try {
-      const res = await fetch(`${API_URL}/settings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
-      });
-      if (res.ok) {
-        setSettings(prev => ({ ...prev, ...updates }));
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
   const fetchCustomers = async () => {
     try {
       const res = await fetch(`${API_URL}/customers`);
@@ -190,7 +162,6 @@ export const DataProvider = ({ children }) => {
       customers, setCustomers, fetchCustomers, addCustomer,
       deliveries, setDeliveries, saveDeliveries, fetchDeliveries,
       bills, setBills, fetchBills, updateBillStatus, generateBills,
-      settings, setSettings, saveSettings, fetchSettings,
       staff, setStaff, fetchStaff, addStaff,
       loading, setLoading, refreshAll,
       API_URL

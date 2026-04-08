@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { UserContext } from '../context/UserContext';
 import { DataContext } from '../context/DataContext';
-import { LogOut, Users, Truck, Receipt, ChevronRight, ShieldCheck, Activity, Bell, Settings as SettingsIcon } from 'lucide-react';
+import { LogOut, Users, Truck, Receipt, ChevronRight, ShieldCheck, Activity, Bell } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';

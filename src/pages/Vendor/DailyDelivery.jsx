@@ -69,9 +69,9 @@ const DailyDelivery = () => {
     };
 
     const handleSync = async () => {
-        const payload = todayData.map(d => ({ ...d, staffId }));
-        await saveDeliveries(payload);
-        alert("Logs synced with Server");
+        const payload = todayData.map(d => ({ ...d, date: todayStr, staffId }));
+        const success = await saveDeliveries(payload);
+        if (success) alert("Logs synced with Server");
     };
 
     const displayData = todayData.map(delivery => {

@@ -42,8 +42,10 @@ export const DataProvider = ({ children }) => {
   const fetchDeliveries = async () => {
     try {
       const res = await fetch(`${API_URL}/deliveries`);
-      const data = await res.json();
-      setDeliveries(data);
+      if (res.ok) {
+        const data = await res.json();
+        setDeliveries(data);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -52,8 +54,10 @@ export const DataProvider = ({ children }) => {
   const fetchBills = async () => {
     try {
       const res = await fetch(`${API_URL}/bills`);
-      const data = await res.json();
-      setBills(data);
+      if (res.ok) {
+        const data = await res.json();
+        setBills(data);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -73,7 +77,7 @@ export const DataProvider = ({ children }) => {
         return saved;
       } else {
         const err = await res.json();
-        alert(err.error || 'Failed to add customer');
+        alert(err.error || err.detail || 'Failed to add customer');
       }
     } catch (e) {
       console.error(e);
@@ -90,11 +94,13 @@ export const DataProvider = ({ children }) => {
       });
       if (res.ok) {
         fetchDeliveries(); // Reload grouping
+        return true;
       }
     } catch (e) {
       console.error(e);
       alert('Error saving deliveries');
     }
+    return false;
   };
 
   const updateBillStatus = async (customerId, newStatus) => {
@@ -147,12 +153,31 @@ export const DataProvider = ({ children }) => {
         body: JSON.stringify(staffData)
       });
       if (res.ok) {
-        fetchStaff();
+        await fetchStaff();
         return true;
+      } else {
+        const err = await res.json();
+        alert(err.detail || 'Error adding staff');
       }
     } catch (e) {
       console.error(e);
       alert('Error adding staff');
+    }
+    return false;
+  };
+
+  const removeStaff = async (phone) => {
+    try {
+      const res = await fetch(`${API_URL}/staff/${phone}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        await fetchStaff();
+        return true;
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error removing staff');
     }
     return false;
   };
@@ -162,7 +187,7 @@ export const DataProvider = ({ children }) => {
       customers, setCustomers, fetchCustomers, addCustomer,
       deliveries, setDeliveries, saveDeliveries, fetchDeliveries,
       bills, setBills, fetchBills, updateBillStatus, generateBills,
-      staff, setStaff, fetchStaff, addStaff,
+      staff, setStaff, fetchStaff, addStaff, removeStaff,
       loading, setLoading, refreshAll,
       API_URL
     }}>

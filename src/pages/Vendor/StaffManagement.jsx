@@ -1,65 +1,65 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext } from 'react';
+import { DataContext } from '../../context/DataContext';
 import { UserContext } from '../../context/UserContext';
-import { ArrowLeft, UserPlus, ShieldPlus, Trash2 } from 'lucide-react';
+import { ArrowLeft, ShieldPlus, Trash2, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-import { SERVER_URL } from '../../config';
 
 const StaffManagement = () => {
   const { user } = useContext(UserContext);
-  const [staff, setStaff] = useState([]);
-  
-  const [newStaff, setNewStaff] = useState({
-    name: '',
-    phone: '',
-    subRole: 'delivery'
-  });
-
-  const fetchStaff = async () => {
-    try {
-      const res = await fetch(`${SERVER_URL}/api/staff`);
-      const data = await res.json();
-      setStaff(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    fetchStaff();
-  }, []);
+  const { staff, addStaff, removeStaff, fetchStaff } = useContext(DataContext);
+  const [newStaff, setNewStaff] = useState({ name: '', phone: '', subRole: 'delivery' });
+  const [status, setStatus] = useState({ type: '', msg: '' }); // type: 'success' | 'error'
+  const [saving, setSaving] = useState(false);
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    if (newStaff.name && newStaff.phone.length === 10) {
-      try {
-        const res = await fetch(`${SERVER_URL}/api/staff`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newStaff)
-        });
-        if (res.ok) {
-           fetchStaff();
-           setNewStaff({ name: '', phone: '', subRole: 'delivery' });
-        } else {
-           alert('Phone number already in use or error');
-        }
-      } catch (err) {
-         console.error(err);
+    setStatus({ type: '', msg: '' });
+
+    if (!newStaff.name.trim()) {
+      setStatus({ type: 'error', msg: 'Please enter the staff name.' });
+      return;
+    }
+    if (newStaff.phone.trim().length < 10) {
+      setStatus({ type: 'error', msg: 'Phone number must be at least 10 digits.' });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const success = await addStaff({
+        name: newStaff.name.trim(),
+        phone: newStaff.phone.trim(),
+        subRole: newStaff.subRole
+      });
+
+      if (success) {
+        const savedName = newStaff.name;
+        setNewStaff({ name: '', phone: '', subRole: 'delivery' });
+        setStatus({ type: 'success', msg: `${savedName} added successfully!` });
+        setTimeout(() => setStatus({ type: '', msg: '' }), 3000);
+      } else {
+        setStatus({ type: 'error', msg: 'Failed to add staff. Phone number may already be in use.' });
       }
+    } catch (err) {
+      setStatus({ type: 'error', msg: 'Could not connect to server. Check your internet.' });
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleRemove = async (phoneToRemove) => {
-    if (staff.find(s => s.phone === phoneToRemove)?.subRole === 'owner') {
-      alert("Cannot remove the Owner.");
-      return;
-    }
+  const handleRemove = async (s) => {
+    if (s.subRole === 'owner') { setStatus({ type: 'error', msg: 'Cannot remove the Owner.' }); return; }
+    if (!window.confirm(`Remove ${s.name} from staff?`)) return;
     try {
-      await fetch(`${SERVER_URL}/api/staff/${phoneToRemove}`, { method: 'DELETE' });
-      fetchStaff();
+      const success = await removeStaff(s.phone);
+      if (success) {
+        setStatus({ type: 'success', msg: `${s.name} removed.` });
+        setTimeout(() => setStatus({ type: '', msg: '' }), 3000);
+      } else {
+        setStatus({ type: 'error', msg: 'Failed to remove staff member.' });
+      }
     } catch (err) {
-      console.error(err);
+      setStatus({ type: 'error', msg: 'Failed to remove staff member.' });
     }
   };
 
@@ -71,93 +71,122 @@ const StaffManagement = () => {
         </Link>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: '700' }}>Staff Management</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Manage shop and delivery incharge access</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Add and manage delivery personnel</p>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gap: '2rem', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
-        <div className="card">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-            <ShieldPlus size={24} color="var(--primary)" />
-            <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>Add Staff Member</h2>
-          </div>
-          
-          <form onSubmit={handleAdd} style={{ display: 'grid', gap: '1rem' }}>
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500' }}>Full Name</label>
-              <input 
-                type="text" 
-                placeholder="Staff Name" 
-                value={newStaff.name}
-                onChange={(e) => setNewStaff({...newStaff, name: e.target.value})}
-                required
-              />
-            </div>
-            
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500' }}>Phone Number (for Login)</label>
-              <input 
-                type="tel" 
-                placeholder="10 digit number" 
-                value={newStaff.phone}
-                onChange={(e) => setNewStaff({...newStaff, phone: e.target.value})}
-                maxLength={10}
-                required
-              />
-            </div>
+      {/* Status Banner */}
+      {status.msg && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '0.75rem',
+          padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem',
+          background: status.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+          color: status.type === 'success' ? '#059669' : '#dc2626',
+          border: `1px solid ${status.type === 'success' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`
+        }}>
+          {status.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+          <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>{status.msg}</span>
+        </div>
+      )}
 
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500' }}>Assign Role</label>
-              <select 
-                value={newStaff.subRole}
-                onChange={(e) => setNewStaff({...newStaff, subRole: e.target.value})}
-              >
-                <option value="delivery">Delivery Incharge (Only log delivery)</option>
-                <option value="shop">Shop Incharge (Manage Customers & Bills)</option>
-              </select>
-            </div>
-
-            <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>
-              Add Member
-            </button>
-          </form>
+      {/* Add Staff Form */}
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+          <ShieldPlus size={22} color="var(--primary)" />
+          <h2 style={{ fontSize: '1.1rem', fontWeight: '700' }}>Add New Staff Member</h2>
         </div>
 
-        <div className="card" style={{ alignSelf: 'start' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem' }}>Active Staff Profiles</h2>
-          <div style={{ display: 'grid', gap: '1rem' }}>
-            {staff.map((s, index) => (
-              <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'var(--bg-main)', borderRadius: '12px' }}>
-                <div>
-                  <h3 style={{ fontWeight: '600' }}>{s.name}</h3>
-                  <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{s.phone}</p>
-                  <span style={{ 
-                    display: 'inline-block',
-                    padding: '0.25rem 0.5rem', 
-                    background: s.subRole === 'owner' ? 'rgba(249, 115, 22, 0.2)' : 'rgba(16, 185, 129, 0.2)',
-                    color: s.subRole === 'owner' ? 'var(--primary-dark)' : 'var(--accent)',
-                    borderRadius: '4px',
-                    fontSize: '0.75rem',
-                    fontWeight: '600',
-                    marginTop: '0.5rem',
-                    textTransform: 'capitalize'
-                  }}>
-                    {s.subRole}
-                  </span>
-                </div>
-                {s.subRole !== 'owner' && (
-                  <button 
-                    onClick={() => handleRemove(s.phone)}
-                    style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '0.5rem' }}
-                  >
-                    <Trash2 size={20} />
-                  </button>
-                )}
+        <form onSubmit={handleAdd} style={{ display: 'grid', gap: '1rem' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-muted)' }}>
+              Full Name *
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Raju Kumar"
+              value={newStaff.name}
+              onChange={(e) => setNewStaff({ ...newStaff, name: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-muted)' }}>
+              Phone Number * (Used for Login)
+            </label>
+            <input
+              type="tel"
+              placeholder="10-digit mobile number"
+              value={newStaff.phone}
+              onChange={(e) => setNewStaff({ ...newStaff, phone: e.target.value.replace(/\D/g, '') })}
+              maxLength={12}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-muted)' }}>
+              Assign Role *
+            </label>
+            <select
+              value={newStaff.subRole}
+              onChange={(e) => setNewStaff({ ...newStaff, subRole: e.target.value })}
+            >
+              <option value="delivery">Delivery Incharge (Logs Delivery Only)</option>
+              <option value="shop">Shop Incharge (Manage Customers & Bills)</option>
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            style={{ marginTop: '0.5rem', width: '100%', padding: '1rem' }}
+            disabled={saving}
+          >
+            {saving ? <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <ShieldPlus size={18} />}
+            {saving ? ' Adding...' : ' Add Staff Member'}
+          </button>
+        </form>
+      </div>
+
+      {/* Staff List */}
+      <div className="card">
+        <h2 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '1.5rem' }}>
+          Active Staff ({staff.length})
+        </h2>
+        <div style={{ display: 'grid', gap: '1rem' }}>
+          {staff.length === 0 ? (
+            <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '1rem' }}>No staff added yet.</p>
+          ) : staff.map((s) => (
+            <div key={s.id} style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: '1rem', background: 'var(--bg-soft)', borderRadius: '12px',
+              border: '1px solid var(--border)'
+            }}>
+              <div>
+                <h3 style={{ fontWeight: '700', fontSize: '1rem' }}>{s.name}</h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>{s.phone}</p>
+                <span style={{
+                  display: 'inline-block', padding: '0.2rem 0.6rem', marginTop: '0.4rem',
+                  background: s.subRole === 'owner' ? 'rgba(234,88,12,0.1)' : 'rgba(16,185,129,0.1)',
+                  color: s.subRole === 'owner' ? 'var(--primary-dark)' : '#059669',
+                  borderRadius: '6px', fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase'
+                }}>
+                  {s.subRole}
+                </span>
               </div>
-            ))}
-          </div>
+              {s.subRole !== 'owner' && (
+                <button
+                  onClick={() => handleRemove(s)}
+                  style={{ background: 'rgba(239,68,68,0.08)', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '0.6rem', borderRadius: '10px' }}
+                >
+                  <Trash2 size={18} />
+                </button>
+              )}
+            </div>
+          ))}
         </div>
       </div>
+
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 };

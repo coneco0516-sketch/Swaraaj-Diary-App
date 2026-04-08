@@ -74,7 +74,7 @@ const CustomerDashboard = () => {
           <div>
             <p style={{ opacity: 0.8, fontSize: '0.875rem' }}>Monthly Bill {currentBill.status === 'paid' ? '(Paid)' : '(Pending)'}</p>
             <h3 style={{ fontSize: '1.75rem', fontWeight: '700' }}>₹ {currentBill.amount.toFixed(2)}</h3>
-            <p style={{ opacity: 0.8, fontSize: '0.75rem', marginTop: '0.5rem' }}>For {currentBill.totalQuantity}L @ ₹50 / L</p>
+            <p style={{ opacity: 0.8, fontSize: '0.75rem', marginTop: '0.5rem' }}>For {currentBill.totalQuantity}L</p>
           </div>
           <Receipt size={48} style={{ opacity: 0.2 }} />
         </div>

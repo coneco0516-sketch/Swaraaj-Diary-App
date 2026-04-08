@@ -9,13 +9,13 @@ const CustomerManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddMode, setIsAddMode] = useState(false);
 
-  const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', defaultQuantity: '1.5', assignedStaffId: '' });
+  const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', defaultQuantity: '1.5', rate: '50', assignedStaffId: '' });
 
   const handleAdd = async (e) => {
     e.preventDefault();
     await addCustomer({ ...newCustomer, status: 'active' });
     setIsAddMode(false);
-    setNewCustomer({ name: '', phone: '', defaultQuantity: '1.5', assignedStaffId: '' });
+    setNewCustomer({ name: '', phone: '', defaultQuantity: '1.5', rate: '50', assignedStaffId: '' });
   };
 
   const filtered = customers.filter(c => 
@@ -62,17 +62,31 @@ const CustomerManagement = () => {
                 required 
               />
             </div>
-            <div style={{ display: 'grid', gap: '0.5rem' }}>
-              <label style={{ fontSize: '0.875rem', fontWeight: '500', color: 'var(--text-muted)' }}>Default Quantity (Liters)</label>
-              <select 
-                value={newCustomer.defaultQuantity}
-                onChange={e => setNewCustomer({...newCustomer, defaultQuantity: e.target.value})}
-              >
-                <option value="0.5">0.5 L</option>
-                <option value="1.0">1.0 L</option>
-                <option value="1.5">1.5 L</option>
-                <option value="2.0">2.0 L</option>
-              </select>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gap: '0.5rem' }}>
+                <label style={{ fontSize: '0.875rem', fontWeight: '500', color: 'var(--text-muted)' }}>Default Quantity (L)</label>
+                <select 
+                  value={newCustomer.defaultQuantity}
+                  onChange={e => setNewCustomer({...newCustomer, defaultQuantity: e.target.value})}
+                >
+                  <option value="0.5">0.5 L</option>
+                  <option value="1.0">1.0 L</option>
+                  <option value="1.5">1.5 L</option>
+                  <option value="2.0">2.0 L</option>
+                  <option value="2.5">2.5 L</option>
+                  <option value="3.0">3.0 L</option>
+                </select>
+              </div>
+              <div style={{ display: 'grid', gap: '0.5rem' }}>
+                <label style={{ fontSize: '0.875rem', fontWeight: '500', color: 'var(--text-muted)' }}>Rate (₹/L)</label>
+                <input 
+                  type="number" 
+                  placeholder="e.g. 50" 
+                  value={newCustomer.rate}
+                  onChange={e => setNewCustomer({...newCustomer, rate: e.target.value})}
+                  required 
+                />
+              </div>
             </div>
             <div style={{ display: 'grid', gap: '0.5rem' }}>
               <label style={{ fontSize: '0.875rem', fontWeight: '500', color: 'var(--text-muted)' }}>Assign to Delivery Incharge (Optional)</label>

@@ -122,6 +122,20 @@ def add_staff(data: Dict[str, Any]):
         cursor.close()
         db.close()
 
+@app.delete("/api/staff/{phone}")
+def delete_staff(phone: str):
+    db = get_db()
+    cursor = db.cursor()
+    try:
+        cursor.execute("DELETE FROM staff WHERE phone = %s AND subRole != 'owner'", (phone,))
+        db.commit()
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        db.close()
+
 @app.get("/api/customers")
 def get_customers():
     db = get_db()

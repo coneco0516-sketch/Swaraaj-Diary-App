@@ -123,7 +123,7 @@ const Billing = () => {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.3)', padding: '1rem', borderRadius: '8px' }}>
                <div>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Usage: {item.totalQuantity} L @ ₹50</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Total: {item.totalQuantity} L</p>
                   <p style={{ fontSize: '1.25rem', fontWeight: '700' }}>₹ {item.amount}</p>
                </div>
                <div style={{ display: 'flex', gap: '0.5rem' }}>

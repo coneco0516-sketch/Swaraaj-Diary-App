@@ -151,7 +151,7 @@ const CustomerManagement = () => {
                        </span>
                        {c.assignedStaffId && (
                            <span style={{ fontSize: '0.75rem', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'rgba(14, 165, 233, 0.1)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
-                              <Truck size={12} /> {staff.find(s => s.id === c.assignedStaffId)?.name || 'Staff Staff'}
+                              <Truck size={12} /> {staff.find(s => s.id === c.assignedStaffId)?.name || 'Unknown'}
                            </span>
                        )}
                     </div>

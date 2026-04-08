@@ -29,7 +29,7 @@ export const DataProvider = ({ children }) => {
 
   const fetchCustomers = async () => {
     try {
-      const res = await fetch(`${API_URL}/customers`);
+      const res = await fetch(`${API_URL}/customers?_t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         setCustomers(data);
@@ -41,7 +41,7 @@ export const DataProvider = ({ children }) => {
 
   const fetchDeliveries = async () => {
     try {
-      const res = await fetch(`${API_URL}/deliveries`);
+      const res = await fetch(`${API_URL}/deliveries?_t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         setDeliveries(data);
@@ -53,7 +53,7 @@ export const DataProvider = ({ children }) => {
 
   const fetchBills = async () => {
     try {
-      const res = await fetch(`${API_URL}/bills`);
+      const res = await fetch(`${API_URL}/bills?_t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         setBills(data);
@@ -66,15 +66,20 @@ export const DataProvider = ({ children }) => {
   // --- ACTIONS ---
   const addCustomer = async (customerData) => {
     try {
+      const payload = { ...customerData };
+      if (payload.assignedStaffId) {
+          payload.assignedStaffId = parseInt(payload.assignedStaffId);
+      }
       const res = await fetch(`${API_URL}/customers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(customerData)
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         const saved = await res.json();
-        setCustomers(prev => [...prev, saved]);
-        return saved;
+        const fullCustomer = { ...payload, id: saved.id };
+        setCustomers(prev => [...prev, fullCustomer]);
+        return fullCustomer;
       } else {
         const err = await res.json();
         alert(err.error || err.detail || 'Failed to add customer');
@@ -135,7 +140,7 @@ export const DataProvider = ({ children }) => {
 
   const fetchStaff = async () => {
     try {
-      const res = await fetch(`${API_URL}/staff`);
+      const res = await fetch(`${API_URL}/staff?_t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         setStaff(data);

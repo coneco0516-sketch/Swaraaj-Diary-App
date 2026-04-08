@@ -1,14 +1,14 @@
 import React, { useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DataContext } from '../../context/DataContext';
-import { ArrowLeft, Phone, Droplet, Calendar, Receipt, Edit, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Phone, Droplet, Calendar, Receipt, Edit, CheckCircle, Truck, UserCircle } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { motion } from 'framer-motion';
 
 const CustomerDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { customers, deliveries } = useContext(DataContext);
+    const { customers, deliveries, staff } = useContext(DataContext);
 
     const customer = customers.find(c => c.id === parseInt(id));
 
@@ -41,14 +41,18 @@ const CustomerDetail = () => {
                     <button className="btn btn-secondary" style={{ padding: '0.5rem' }}><Edit size={18} /></button>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                        <div style={{ background: '#f1f5f9', p: '0.4rem', borderRadius: '8px' }}><Phone size={14} /></div>
+                        <div style={{ background: '#f1f5f9', padding: '0.5rem', borderRadius: '8px', display: 'flex' }}><Phone size={14} /></div>
                         <span style={{ fontSize: '0.85rem' }}>{customer.phone}</span>
                     </div>
                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                        <div style={{ background: '#f1f5f9', p: '0.4rem', borderRadius: '8px' }}><Droplet size={14} /></div>
+                        <div style={{ background: '#f1f5f9', padding: '0.5rem', borderRadius: '8px', display: 'flex' }}><Droplet size={14} /></div>
                         <span style={{ fontSize: '0.85rem' }}>{customer.defaultQuantity} L/day</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', gridColumn: '1 / -1' }}>
+                        <div style={{ background: '#f1f5f9', padding: '0.5rem', borderRadius: '8px', display: 'flex' }}><Truck size={14} /></div>
+                        <span style={{ fontSize: '0.85rem' }}>{customer.assignedStaffId ? `Assigned to: ${staff.find(s => s.id === customer.assignedStaffId)?.name || 'Unknown'}` : 'No Staff Assigned'}</span>
                     </div>
                 </div>
             </div>

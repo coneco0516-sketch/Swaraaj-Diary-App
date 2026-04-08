@@ -157,8 +157,12 @@ def add_customer(data: Dict[str, Any]):
     db = get_db()
     cursor = db.cursor()
     try:
+        assigned_staff_id = data.get('assignedStaffId')
+        if not assigned_staff_id:
+            assigned_staff_id = None
+            
         cursor.execute("INSERT INTO customers (name, phone, defaultQuantity, rate, status, assignedStaffId) VALUES (%s, %s, %s, %s, %s, %s)", 
-                       (data['name'], data['phone'], data.get('defaultQuantity', 1.5), data.get('rate', 50.0), 'active', data.get('assignedStaffId')))
+                       (data['name'], data['phone'], data.get('defaultQuantity', 1.5), data.get('rate', 50.0), 'active', assigned_staff_id))
         db.commit()
         return {"id": cursor.lastrowid}
     except Exception as e:

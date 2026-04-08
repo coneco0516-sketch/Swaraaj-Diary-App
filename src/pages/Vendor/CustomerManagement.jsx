@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, UserPlus, Search, Phone, Droplet, User, Edit, ChevronRight } from 'lucide-react';
+import { ArrowLeft, UserPlus, Search, Phone, Droplet, User, Edit, ChevronRight, Truck } from 'lucide-react';
 import { DataContext } from '../../context/DataContext';
 
 const CustomerManagement = () => {
@@ -145,10 +145,15 @@ const CustomerManagement = () => {
                   </div>
                   <div>
                     <h4 style={{ fontWeight: '600', color: 'var(--text-main)' }}>{c.name}</h4>
-                    <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '0.25rem' }}>
                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                           <Phone size={12} /> {c.phone}
                        </span>
+                       {c.assignedStaffId && (
+                           <span style={{ fontSize: '0.75rem', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'rgba(14, 165, 233, 0.1)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                              <Truck size={12} /> {staff.find(s => s.id === c.assignedStaffId)?.name || 'Staff Staff'}
+                           </span>
+                       )}
                     </div>
                   </div>
                 </div>

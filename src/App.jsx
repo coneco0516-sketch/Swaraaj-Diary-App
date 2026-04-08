@@ -24,11 +24,11 @@ import './index.css';
 
 const NativeNavigation = () => {
     const navigate = useNavigate();
-    const location = useLocation();
 
     useEffect(() => {
         const handler = CapApp.addListener('backButton', ({ canGoBack }) => {
-            if (location.pathname === '/vendor' || location.pathname === '/customer' || location.pathname === '/home' || location.pathname === '/') {
+            const currentPath = window.location.pathname;
+            if (currentPath === '/vendor' || currentPath === '/customer' || currentPath === '/home' || currentPath === '/login' || currentPath === '/') {
                 if (window.confirm("Do you want to exit the app?")) {
                   CapApp.exitApp();
                 }
@@ -37,7 +37,7 @@ const NativeNavigation = () => {
             }
         });
         return () => { handler.then(h => h.remove()); };
-    }, [location, navigate]);
+    }, [navigate]);
 
     return null;
 };

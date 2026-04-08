@@ -1,0 +1,47 @@
+﻿Starting a Gradle Daemon, 1 incompatible Daemon could not be reused, use --status for details
+Daemon JVM discovery is an incubating feature.
+.\gradlew : 
+At line:1 char:14
++ cd android ; .\gradlew 
+assembleDebug > gradle_error.txt 2>&1
++              ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpec 
+   ified: (:String) [], RemoteExcept  
+  ion
+    + FullyQualifiedErrorId : NativeC 
+   ommandError
+ 
+FAILURE: Build failed with an 
+exception.
+
+* What went wrong:
+Unable to download toolchain matching 
+the requirements 
+({languageVersion=21, 
+vendor=JetBrains, 
+implementation=vendor-specific, 
+nativeImageCapable=false}) from 'https
+://api.foojay.io/disco/v3.0/ids/dbd05c
+4936d573642f94cd149e1356c8/redirect', 
+due to: Timeout waiting to lock jbrsdk
+_jcef-21-JetBrains-21.0.10-windows-x64
+-b1163.110.tar.gz. It is currently in 
+use by another Gradle instance.
+Owner PID: 12964
+Our PID: 15124
+Owner Operation: Downloading toolchain
+Our operation: Downloading toolchain
+Lock file: C:\Users\demas\.gradle\jdks
+\jbrsdk_jcef-21-JetBrains-21.0.10-wind
+ows-x64-b1163.110.tar.gz.lock
+
+* Try:
+> Run with --stacktrace option to get 
+the stack trace.
+> Run with --info or --debug option 
+to get more log output.
+> Run with --scan to get full 
+insights.
+> Get more help at 
+https://help.gradle.org.

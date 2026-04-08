@@ -22,25 +22,19 @@ import { DataProvider } from './context/DataContext';
 import MainLayout from './components/MainLayout';
 import './index.css';
 
-const NativeNavigation = () => {
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        const handler = CapApp.addListener('backButton', ({ canGoBack }) => {
-            const currentPath = window.location.pathname;
-            if (currentPath === '/vendor' || currentPath === '/customer' || currentPath === '/home' || currentPath === '/login' || currentPath === '/') {
-                if (window.confirm("Do you want to exit the app?")) {
-                  CapApp.exitApp();
-                }
-            } else {
-                navigate(-1);
-            }
-        });
-        return () => { handler.then(h => h.remove()); };
-    }, [navigate]);
-
-    return null;
-};
+// --- Global Native Android Back Button Override ---
+CapApp.addListener('backButton', () => {
+    const currentPath = window.location.pathname;
+    const rootPaths = ['/vendor', '/customer', '/home', '/login', '/'];
+    
+    if (rootPaths.includes(currentPath)) {
+        if (window.confirm("Do you want to exit the app?")) {
+            CapApp.exitApp();
+        }
+    } else {
+        window.history.back();
+    }
+});
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -68,7 +62,6 @@ function App() {
     <UserContext.Provider value={{ user, login, logout }}>
       <DataProvider>
         <Router>
-          <NativeNavigation />
           <MainLayout>
             <Routes>
               <Route path="/login" element={!user ? <Login /> : <Navigate to={user.role === 'vendor' ? '/vendor' : '/customer'} />} />

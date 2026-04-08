@@ -6,7 +6,7 @@ import { DataContext } from '../../context/DataContext';
 
 const Billing = () => {
   const navigate = useNavigate();
-  const { customers, bills, updateBillStatus, generateBills } = useContext(DataContext);
+  const { customers, bills, updateBillStatus, generateBills, fetchBills } = useContext(DataContext);
   const [searchTerm, setSearchTerm] = useState('');
 
   const currentMonth = format(new Date(), 'yyyy-MM');

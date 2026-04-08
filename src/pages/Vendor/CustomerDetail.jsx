@@ -60,7 +60,7 @@ const CustomerDetail = () => {
                     <span className="stat-label">Total Drops</span>
                 </div>
                 <div className="stat-card">
-                    <span className="stat-value">₹ {customerLogs.reduce((s,l) => s + (l.quantity * 50), 0)}</span>
+                    <span className="stat-value">₹ {customerLogs.reduce((s, l) => s + ((l.quantity || 0) * (l.rate || 50)) + ((l.extraQuantity || 0) * (l.extraRate || 50)), 0).toFixed(0)}</span>
                     <span className="stat-label">Current Dues</span>
                 </div>
             </div>

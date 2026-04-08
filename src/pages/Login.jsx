@@ -65,20 +65,18 @@ const Login = () => {
           style={{ width: '100%', maxWidth: '400px', padding: '2.5rem 1.5rem' }}
         >
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <div style={{ 
-              width: '80px', 
-              height: '80px', 
-              background: 'var(--primary)', 
-              borderRadius: '24px', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              margin: '0 auto 1.5rem auto',
-              color: 'white',
-              boxShadow: 'var(--shadow-lg)'
-            }}>
-              <LogIn size={40} />
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="Swaraaj Logo" 
+              style={{ 
+                width: '100px', 
+                height: '100px', 
+                borderRadius: '24px', 
+                margin: '0 auto 1.5rem auto',
+                boxShadow: 'var(--shadow-lg)',
+                objectFit: 'contain'
+              }} 
+            />
             <h1 style={{ fontSize: '1.75rem', fontWeight: '900', color: 'var(--primary-dark)', letterSpacing: '-0.02em' }}>SWARAAJ DAIRY</h1>
             <p className="text-muted" style={{ marginTop: '0.25rem' }}>Secure access for members</p>
           </div>

@@ -40,10 +40,13 @@ const VendorDashboard = () => {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
       >
-        <div>
-          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.8 }}>Dairy Console</span>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'white' }}>Swaraaj Dairy Hub</h1>
-          <p style={{ fontSize: '0.85rem', opacity: 0.9 }}>Welcome, {user.name || 'Vendor'}</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <img src="/logo.png" alt="logo" style={{ width: '50px', height: '50px', borderRadius: '12px' }} />
+          <div>
+            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.8 }}>Dairy Console</span>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'white' }}>Swaraaj Dairy Hub</h1>
+            <p style={{ fontSize: '0.85rem', opacity: 0.9 }}>Welcome, {user.name || 'Vendor'}</p>
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <button className="btn" onClick={logout} style={{ background: 'rgba(255,255,255,0.2)', padding: '0.5rem', borderRadius: '10px', color: 'white' }}>

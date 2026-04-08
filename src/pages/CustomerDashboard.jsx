@@ -51,18 +51,7 @@ const CustomerDashboard = () => {
         padding: '1rem 0'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ 
-            width: '40px', 
-            height: '40px', 
-            background: 'var(--primary)', 
-            borderRadius: '10px', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            color: 'white'
-          }}>
-            <User size={20} />
-          </div>
+          <img src="/logo.png" alt="logo" style={{ width: '40px', height: '40px', borderRadius: '10px' }} />
           <div>
             <h2 style={{ fontSize: '1.25rem', fontWeight: '700' }}>Swaraaj Milk Dairy</h2>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Welcome, {customer.name !== 'Guest User' ? customer.name : user.phone}</p>

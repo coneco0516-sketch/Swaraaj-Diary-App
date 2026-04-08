@@ -85,6 +85,12 @@ def startup():
             FOREIGN KEY(customerId) REFERENCES customers(id)
         )
     """)
+    # Migrate old database: remove settings table entirely as we no longer use it
+    try:
+        cursor.execute("DROP TABLE IF EXISTS settings")
+    except:
+        pass
+
     # Defaults
     cursor.execute("INSERT IGNORE INTO staff (name, phone, subRole) VALUES ('Swaraaj Owner', '9149405624', 'owner')")
     
